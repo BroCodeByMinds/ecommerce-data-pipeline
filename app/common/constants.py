@@ -45,3 +45,16 @@ class SQSKeys:
 class LogMessages:
     SQS_SEND_SUCCESS = "Message sent to SQS. Message ID: %s"
     SQS_SEND_FAILURE = "Failed to send message to SQS: %s"
+    PROCESSING_ERROR = "Failed to process order: %s"
+    INVALID_ORDER = "Invalid order received: %s"
+    WORKER_STARTED = "Worker started polling SQS..."
+    ORDER_PROCESSED = "Processed order for user %s"
+
+class OrderFields:
+    ORDER_ID = "order_id"
+    USER_ID = "user_id"
+    ORDER_VALUE = "order_value"
+    ITEMS = "items"
+    QUANTITY = "quantity"
+    PRICE_PER_UNIT = "price_per_unit"
+    ORDER_TIMESTAMP = "order_timestamp"
