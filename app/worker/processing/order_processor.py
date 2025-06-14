@@ -1,27 +1,44 @@
-# worker/processing/order_processor.py
 import json
+import logging
+from typing import Optional, Dict
+from app.common.constants import LogMessages, OrderFields
+
+logger = logging.getLogger(__name__)
+
 
 def is_valid_order(order: dict) -> bool:
     try:
-        if not all(k in order for k in ("user_id", "order_id", "order_value", "items")):
+        required_fields = (
+            OrderFields.USER_ID,
+            OrderFields.ORDER_ID,
+            OrderFields.ORDER_VALUE,
+            OrderFields.ITEMS
+        )
+        if not all(k in order for k in required_fields):
             return False
-        calculated_total = sum(item["quantity"] * item["price_per_unit"] for item in order["items"])
-        return abs(calculated_total - order["order_value"]) < 0.01  # float-safe
-    except Exception:
+
+        calculated_total = sum(
+            item[OrderFields.QUANTITY] * item[OrderFields.PRICE_PER_UNIT]
+            for item in order[OrderFields.ITEMS]
+        )
+        return abs(calculated_total - order[OrderFields.ORDER_VALUE]) < 0.01
+    except Exception as e:
+        logger.warning(LogMessages.PROCESSING_ERROR, e)
         return False
 
-def process_order(raw_msg: str):
+
+def process_order(raw_msg: str) -> Optional[Dict]:
     try:
         order = json.loads(raw_msg)
         if not is_valid_order(order):
-            print(f"Invalid order: {order.get('order_id')}")
+            logger.warning(LogMessages.INVALID_ORDER, order.get(OrderFields.ORDER_ID))
             return None
-        
+
         return {
-            "user_id": order["user_id"],
-            "order_value": order["order_value"],
-            "order_timestamp": order["order_timestamp"]
+            OrderFields.USER_ID: order[OrderFields.USER_ID],
+            OrderFields.ORDER_VALUE: order[OrderFields.ORDER_VALUE],
+            OrderFields.ORDER_TIMESTAMP: order[OrderFields.ORDER_TIMESTAMP]
         }
     except Exception as e:
-        print("Failed to process order:", e)
+        logger.error(LogMessages.PROCESSING_ERROR, e)
         return None
