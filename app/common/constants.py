@@ -36,3 +36,12 @@ class ResponseStatus:
     SUCCESS = "success"
     ERROR = "error"
     WARNING = "warning"
+
+
+class SQSKeys:
+    QUEUE_URL = "QueueUrl"
+    MESSAGE_ID = "MessageId"
+
+class LogMessages:
+    SQS_SEND_SUCCESS = "Message sent to SQS. Message ID: %s"
+    SQS_SEND_FAILURE = "Failed to send message to SQS: %s"
