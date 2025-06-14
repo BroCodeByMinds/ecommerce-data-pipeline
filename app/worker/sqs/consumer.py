@@ -1,12 +1,13 @@
-# worker/sqs/consumer.py
 import boto3
-import json
+from typing import Generator, Dict
 from app.common.config import AWS_REGION, AWS_ENDPOINT_URL, SQS_QUEUE_NAME
+from app.common.enums import SQSResponseKeys
 
 sqs = boto3.client("sqs", region_name=AWS_REGION, endpoint_url=AWS_ENDPOINT_URL)
-queue_url = sqs.get_queue_url(QueueName=SQS_QUEUE_NAME)["QueueUrl"]
+queue_url = sqs.get_queue_url(QueueName=SQS_QUEUE_NAME)[SQSResponseKeys.QUEUE_URL.value]
 
-def poll_messages():
+
+def poll_messages() -> Generator[Dict, None, None]:
     response = sqs.receive_message(
         QueueUrl=queue_url,
         MaxNumberOfMessages=5,
@@ -16,5 +17,4 @@ def poll_messages():
     messages = response.get("Messages", [])
     for msg in messages:
         yield msg
-        # Delete after processing (to avoid re-processing)
         sqs.delete_message(QueueUrl=queue_url, ReceiptHandle=msg["ReceiptHandle"])
