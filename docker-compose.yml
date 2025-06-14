@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    ports:
+      - "6379:6379"
+
+  localstack:
+    image: localstack/localstack
+    container_name: localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sqs
+      - EDGE_PORT=4566
+      - DEFAULT_REGION=us-east-1
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  web:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    container_name: fastapi-web
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+
+  worker:
+    build:
+      context: ./app/worker
+      dockerfile: Dockerfile
+    container_name: sqs-worker
+    depends_on:
+      - localstack
+      - redis
