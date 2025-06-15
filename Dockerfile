@@ -1,18 +1,11 @@
 FROM python:3.12-slim
 
 WORKDIR /app
-
-# Install dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
-
-# Copy your entire application
 COPY . .
 
-# Set PYTHONPATH so "app" can be imported
+# Add this to allow relative imports like "from common.xxx import yyy"
 ENV PYTHONPATH=/app
 
-EXPOSE 8000
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Start FastAPI app
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "scripts/populate_sqs.py"]
