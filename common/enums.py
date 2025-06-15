@@ -1,6 +1,6 @@
 from enum import Enum
 
-from app.common.constants import SQSKeys
+from common.constants import SQSKeys
 
 
 class SQSResponseKeys(str, Enum):

@@ -1,40 +1,74 @@
 version: '3.8'
 
 services:
+  fastapi-web:
+    build:
+      context: .                         # Root context to include all source folders
+      dockerfile: web/Dockerfile
+    ports:
+      - "8000:8000"
+    working_dir: /app/web
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+    volumes:
+      - .:/app                           # Mount entire project for dev hot reload
+    depends_on:
+      - redis
+      - localstack
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - SQS_QUEUE_NAME=orders-queue
+      - AWS_REGION=us-east-1
+      - AWS_ENDPOINT_URL=http://localstack:4566
+
+  sqs-worker:
+    build:
+      context: .
+      dockerfile: worker/Dockerfile
+    working_dir: /app/worker
+    command: ["python", "main.py"]
+    volumes:
+      - .:/app 
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - AWS_ACCESS_KEY_ID=dummy
+      - AWS_SECRET_ACCESS_KEY=dummy
+      - AWS_DEFAULT_REGION=us-east-1 
+      - AWS_REGION=us-east-1
+      - SQS_QUEUE_NAME=orders-queue
+      - AWS_ENDPOINT_URL=http://localstack:4566
+    depends_on:
+      - redis
+      - localstack
 
   redis:
-    image: redis:latest
-    container_name: redis
+    image: redis:7
     ports:
       - "6379:6379"
 
   localstack:
     image: localstack/localstack
-    container_name: localstack
     ports:
-      - "4566:4566"
+      - "4566:4566"                      # LocalStack edge port for all services
     environment:
       - SERVICES=sqs
       - EDGE_PORT=4566
       - DEFAULT_REGION=us-east-1
+      - LOCALSTACK_VOLUME_DIR=/var/lib/localstack
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-
-  web:
+      - ./tmp/localstack:/var/lib/localstack
+  
+  populate-sqs:
     build:
-      context: ./app
-      dockerfile: Dockerfile
-    container_name: fastapi-web
-    ports:
-      - "8000:8000"
-    depends_on:
-      - redis
-
-  worker:
-    build:
-      context: ./app/worker
-      dockerfile: Dockerfile
-    container_name: sqs-worker
+      context: .
+    volumes:
+      - .:/app 
+    container_name: populate-sqs
+    command: python scripts/populate_sqs.py
+    environment:
+      - AWS_ENDPOINT_URL=http://localstack:4566
+      - AWS_REGION=us-east-1
+      - SQS_QUEUE_NAME=orders-queue
     depends_on:
       - localstack
-      - redis

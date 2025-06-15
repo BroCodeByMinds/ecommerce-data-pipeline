@@ -1,6 +1,6 @@
 import redis
 from typing import Optional
-from app.common.config import REDIS_HOST, REDIS_PORT
+from common.config import REDIS_HOST, REDIS_PORT
 
 _redis_client: Optional[redis.Redis] = None
 
