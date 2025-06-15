@@ -1,0 +1,16 @@
+# AWS SDK
+boto3==1.34.72
+botocore==1.34.72
+
+# Redis client
+redis==5.0.3
+
+# FastAPI and server
+fastapi==0.110.2
+uvicorn[standard]==0.29.0
+
+# Environment variable support
+python-dotenv==1.0.1
+
+# Data validation / typing
+pydantic==2.6.4
