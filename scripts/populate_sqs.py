@@ -26,13 +26,13 @@ def get_queue_url(sqs_client) -> str:
 
 def get_sample_order() -> dict:
     return {
-        "order_id": "ORD1234",
-        "user_id": "U5678",
+        "order_id": "ORD1235",
+        "user_id": "U0003",
         "order_timestamp": "2024-12-13T10:00:00Z",
-        "order_value": 99.99,
+        "order_value": 60.00,
         "items": [
-            {"product_id": "P001", "quantity": 2, "price_per_unit": 20.00},
-            {"product_id": "P002", "quantity": 1, "price_per_unit": 59.99}
+            {"product_id": "P003", "quantity": 1, "price_per_unit": 35.00},
+            {"product_id": "P004", "quantity": 1, "price_per_unit": 25.00}
         ],
         "shipping_address": "123 Main St, Springfield",
         "payment_method": "CreditCard"
